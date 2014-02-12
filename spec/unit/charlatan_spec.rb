@@ -73,6 +73,14 @@ describe Charlatan do
     expect(object.size).to be(3)
   end
 
+  it 'will define the method after hitting method_missing' do
+    charlatan1 = Class.new { include Charlatan.new(:arr) }
+    object = charlatan1.new([])
+    object.should_receive(:method_missing).once.and_call_original
+    object.size
+    object.size
+  end
+
   context 'when target kind is provided' do
     subject(:charlatan) { klass.new(other_class.new) }
 
