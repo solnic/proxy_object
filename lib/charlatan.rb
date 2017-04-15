@@ -45,15 +45,18 @@ class Charlatan < Module
 
     def method_missing(method_name, *args, &block)
       if __proxy_target__.respond_to?(method_name)
-        response = __proxy_target__.public_send(method_name, *args, &block)
+        self.class.send(:define_method, method_name) do |*options, &my_block|
+          response = __proxy_target__.public_send(method_name, *options, &my_block)
 
-        if response.equal?(__proxy_target__)
-          self
-        elsif response.kind_of?(__proxy_kind__)
-          self.class.new(*[response]+__proxy_args__)
-        else
-          response
+          if response.equal?(__proxy_target__)
+            self
+          elsif response.kind_of?(__proxy_kind__)
+            self.class.new(*[response]+__proxy_args__)
+          else
+            response
+          end
         end
+        send(method_name, *args, &block)
       else
         super
       end
